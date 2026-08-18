@@ -16,6 +16,7 @@
     --bad: #A33827;
     --bad-soft: #F3DDD8;
     --on-accent: #FFF6F0;
+    --alarm: #C0271B;
     --art-bg: #E7EDE0;
     --shadow: 0 1px 2px rgba(23,37,29,.06), 0 8px 24px -12px rgba(23,37,29,.22);
 
@@ -40,6 +41,7 @@
       --bad: #E2735E;
       --bad-soft: #33201C;
       --on-accent: #1A0E07;
+      --alarm: #FF8A72;
       --art-bg: #1E2D24;
       --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 28px -14px rgba(0,0,0,.7);
     }
@@ -60,6 +62,7 @@
     --bad: #E2735E;
     --bad-soft: #33201C;
     --on-accent: #1A0E07;
+    --alarm: #FF8A72;
     --art-bg: #1E2D24;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 28px -14px rgba(0,0,0,.7);
   }
@@ -303,16 +306,44 @@
   .gift.none { background: var(--surface-2); }
   .gift.none .kicker { color: var(--ink-soft); }
 
-  .status {
-    display: flex; align-items: flex-start; gap: 10px; font-size: 14.5px;
-    padding: 12px 14px; border-radius: 4px; background: var(--good-soft);
+  /* --- крупный красный статус --- */
+  .shout {
+    margin: 0;
+    font-family: var(--display);
+    font-size: clamp(21px, 5.6vw, 25px);
+    line-height: 1.2;
+    color: var(--alarm);
+    text-align: center;
+    text-wrap: balance;
   }
-  .status.wait { background: var(--surface-2); }
-  .status.fail { background: var(--bad-soft); }
-  .status .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--good); flex: none; margin-top: 6px; }
-  .status.wait .dot { background: var(--honey); animation: pulse 1.1s ease-in-out infinite; }
-  .status.fail .dot { background: var(--bad); }
-  @keyframes pulse { 50% { opacity: .3; } }
+  .shout.wait { color: var(--ink-soft); font-size: 17px; }
+
+  /* --- плитки сценариев --- */
+  .hub { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .hub-btn {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 14px 12px 15px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    text-align: center;
+    transition: border-color .18s ease, background .18s ease;
+  }
+  .hub-btn:hover { border-color: var(--accent); }
+  .hub-btn .ico {
+    width: 54px; height: 54px; border-radius: 50%;
+    background: var(--art-bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hub-btn .ico svg { width: 40px; height: 40px; display: block; }
+  .hub-btn b { font-family: var(--display); font-weight: 400; font-size: 16.5px; line-height: 1.2; }
+  .hub-btn small {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  .hub-btn.main { border-color: var(--accent); background: var(--accent-soft); }
+  .hub-btn.main .ico { background: var(--surface); }
+  .hub-btn.done { opacity: .5; }
 
   .code {
     font-family: var(--mono); font-size: 16px; font-weight: 600; letter-spacing: .05em;
@@ -371,7 +402,7 @@
   <header class="masthead">
     <div class="brand" id="brand">Алтайский павильон</div>
     <div class="track" id="track">
-      <span class="on">меню</span><i>›</i><span>квиз</span><i>›</i><span>заказ</span>
+      <span class="on">меню</span><i>›</i><span>заказ</span><i>›</i><span>комплимент</span>
     </div>
   </header>
 
@@ -393,14 +424,12 @@
     <div class="pitch">
       <div class="art" id="pitch-art"></div>
       <div>
-        <b>Три вопроса — и гостинец</b>
-        <p>Один верный ответ — лимонад, два — кедровая шишка, три — кусочек алтайского сыра. Минута времени.</p>
+        <b>После заказа — квиз</b>
+        <p>Пока собирают заказ, ответьте на три вопроса об Алтае: лимонад, кедровая шишка или кусочек сыра в подарок.</p>
       </div>
     </div>
-    <button class="go wide" id="to-quiz">Пройти квиз и оформить</button>
-    <button class="flat" id="skip-quiz">Оформить без квиза</button>
-    <button class="flat" id="facts-from-cart">Интересные факты об Алтае</button>
-    <button class="flat" id="back-menu">Вернуться в меню</button>
+    <button class="go wide" id="send-order">Отправить заказ в павильон</button>
+    <button class="flat" id="back-menu">Добавить ещё что-нибудь</button>
   </section>
 
   <!-- 3. КВИЗ -->
@@ -415,7 +444,7 @@
     <button class="go wide" id="next" style="display:none">Дальше</button>
   </section>
 
-  <!-- 4–5. ЗАКАЗ -->
+  <!-- ЗАКАЗ: хаб -->
   <section class="screen" id="scr-order">
     <div class="ticket">
       <div class="ticket-top">
@@ -425,19 +454,45 @@
       </div>
       <div class="perf"></div>
       <div class="ticket-body">
-        <div class="status wait" id="order-status"><span class="dot"></span><span id="order-status-text">Отправляем заказ в павильон…</span></div>
-        <div class="gift" id="gift"></div>
-        <div class="lines" id="order-lines"></div>
-        <div class="totals">
-          <div class="trow final"><span>К оплате</span><span id="o-final">0 ₽</span></div>
-        </div>
-        <div class="code" id="order-code">СЫР · ПАНТЫ</div>
-        <div class="meta"><span id="o-score">3 из 3</span><span>Действует <b id="o-timer">15:00</b></span></div>
+        <p class="shout" id="order-status">Отправляем заказ в павильон…</p>
+        <div class="gift" id="gift" style="display:none"></div>
       </div>
     </div>
-    <p class="fineprint center" id="order-note">Назовите номер заказа на кассе — заказ уже собирают.</p>
-    <button class="go wide" id="facts-from-order">Интересные факты об Алтае</button>
-    <button class="flat" id="restart">Новый заказ</button>
+
+    <div class="hub" id="hub">
+      <button class="hub-btn main" id="hub-quiz">
+        <span class="ico" id="ico-quiz"></span>
+        <b>Пройти квиз</b>
+        <small>получить комплимент</small>
+      </button>
+      <button class="hub-btn" id="hub-facts">
+        <span class="ico" id="ico-facts"></span>
+        <b>Факты об Алтае</b>
+        <small>десять коротких</small>
+      </button>
+      <button class="hub-btn" id="hub-items">
+        <span class="ico" id="ico-items"></span>
+        <b>Состав заказа</b>
+        <small>что я заказал</small>
+      </button>
+      <button class="hub-btn" id="hub-new">
+        <span class="ico" id="ico-new"></span>
+        <b>Ещё один заказ</b>
+        <small>добавить покупки</small>
+      </button>
+    </div>
+  </section>
+
+  <!-- СОСТАВ ЗАКАЗА -->
+  <section class="screen" id="scr-items">
+    <h1>Состав заказа <em id="items-no">№ —</em></h1>
+    <div class="lines" id="order-lines"></div>
+    <div class="totals">
+      <div class="trow final"><span>К оплате</span><span id="o-final">0 ₽</span></div>
+    </div>
+    <div class="code" id="order-code">СЫР · ПАНТЫ</div>
+    <div class="meta"><span id="o-score">квиз не пройден</span><span id="o-when-line">—</span></div>
+    <button class="go wide" id="items-back">Вернуться к заказу</button>
   </section>
 
   <!-- ФАКТЫ -->
@@ -474,7 +529,6 @@
   /* ============ НАСТРОЙКИ ПАВИЛЬОНА ============ */
   const CONFIG = {
     pavilion: "Алтайский павильон",
-    minutesValid: 15,
 
     /* Адрес веб-приложения Google Apps Script — сюда падают заказы.
        Пока строка пустая, заказ никуда не уходит: покупатель показывает экран продавцу. */
@@ -770,12 +824,16 @@
 
   $("brand").textContent = CONFIG.pavilion;
   $("pitch-art").innerHTML = svg("wedge", PRIZE_TONE.wedge);
+  $("ico-quiz").innerHTML = svg("wedge", PRIZE_TONE.wedge);
+  $("ico-facts").innerHTML = factSvg("berry", "#E1741B");
+  $("ico-items").innerHTML = svg("box", "#5B7A4B");
+  $("ico-new").innerHTML = svg("jar", "#D79A18");
 
   const BY_ID = {};
   MENU.forEach((c) => c.items.forEach((it) => { BY_ID[it.id] = it; }));
 
   const cart = {};
-  let quiz = [], step = 0, score = 0, log = [], timerId = null, order = null;
+  let quiz = [], step = 0, score = 0, log = [], order = null;
 
   function show(id, trackIndex) {
     document.querySelectorAll(".screen").forEach((s) => s.classList.remove("on"));
@@ -977,41 +1035,60 @@
     v.appendChild(tag); v.appendChild(p);
     $("verdict-slot").appendChild(v);
 
-    $("next").textContent = step === 2 ? "Оформить заказ" : "Дальше";
+    $("next").textContent = step === 2 ? "Показать комплимент" : "Дальше";
     $("next").style.display = "block";
   }
 
   /* ---- заказ ---- */
-  function makeOrder(withQuiz) {
+  function makeOrder() {
     const now = new Date();
-    const prize = withQuiz ? CONFIG.prizes[score] : null;
 
     order = {
       no: pad(now.getHours()) + pad(now.getMinutes()) + "-" + Math.floor(10 + Math.random() * 89),
       at: now.getTime(),
-      until: now.getTime() + CONFIG.minutesValid * 60000,
       items: cartList(),
       sum: cartSum(),
-      score: withQuiz ? score : null,
-      prize: prize,
+      score: null,
+      prize: null,
+      quizDone: false,
       word: wordOfDay()
     };
 
     renderOrder();
-    show("scr-order", 2);
+    show("scr-order", 1);
     sendOrder();
   }
 
   function renderOrder() {
     $("order-no").textContent = "№ " + order.no;
+    $("items-no").textContent = "№ " + order.no;
+
     const d = new Date(order.at);
-    $("order-when").textContent = pad(d.getDate()) + "." + pad(d.getMonth() + 1) + " · " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+    const when = pad(d.getDate()) + "." + pad(d.getMonth() + 1) + " · " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+    $("order-when").textContent = when;
+    $("o-when-line").textContent = when;
 
     renderLines($("order-lines"), order.items);
     $("o-final").textContent = rub(order.sum);
 
+    $("order-code").textContent = order.prize
+      ? order.prize.key.toUpperCase() + " · " + order.word
+      : "БЕЗ КОМПЛИМЕНТА · " + order.word;
+    $("o-score").textContent = order.quizDone
+      ? order.score + " из 3 верных"
+      : "квиз не пройден";
+
+    renderGift();
+    renderHub();
+  }
+
+  function renderGift() {
     const gift = $("gift");
+    if (!order.quizDone) { gift.style.display = "none"; return; }
+
+    gift.style.display = "flex";
     gift.innerHTML = "";
+
     const art = document.createElement("div");
     art.className = "art";
     const txt = document.createElement("div");
@@ -1030,75 +1107,92 @@
     } else {
       gift.className = "gift none";
       art.innerHTML = svg("cone", "#9AA99D");
-      kicker.textContent = order.score === null ? "Квиз не пройден" : "В этот раз без гостинца";
+      kicker.textContent = "В этот раз без гостинца";
       nameEl.textContent = "Комплимента нет";
       noteEl.textContent = "Следующий заказ — новая попытка";
     }
 
     txt.appendChild(kicker); txt.appendChild(nameEl); txt.appendChild(noteEl);
     gift.appendChild(art); gift.appendChild(txt);
-
-    $("order-code").textContent = order.prize
-      ? order.prize.key.toUpperCase() + " · " + order.word
-      : "БЕЗ ГОСТИНЦА · " + order.word;
-    $("o-score").textContent = order.score === null ? "без квиза" : order.score + " из 3";
-
-    tick();
-    if (timerId) clearInterval(timerId);
-    timerId = setInterval(tick, 1000);
   }
 
-  function tick() {
-    const left = order.until - Date.now();
-    const el = $("o-timer");
-    if (left <= 0) {
-      el.textContent = "истёк";
-      clearInterval(timerId);
-      return;
+  function renderHub() {
+    const q = $("hub-quiz");
+    if (order.quizDone) {
+      q.className = "hub-btn done";
+      q.disabled = true;
+      q.querySelector("b").textContent = "Квиз пройден";
+      q.querySelector("small").textContent = order.score + " из 3";
+    } else {
+      q.className = "hub-btn main";
+      q.disabled = false;
+      q.querySelector("b").textContent = "Пройти квиз";
+      q.querySelector("small").textContent = "получить комплимент";
     }
-    el.textContent = Math.floor(left / 60000) + ":" + pad(Math.floor((left % 60000) / 1000));
   }
 
-  function setStatus(kind, text) {
-    $("order-status").className = "status " + kind;
-    $("order-status-text").textContent = text;
+  function shout(kind, text) {
+    $("order-status").className = "shout" + (kind === "wait" ? " wait" : "");
+    $("order-status").textContent = text;
   }
 
-  function payload() {
-    return {
-      no: order.no,
-      time: new Date(order.at).toLocaleString("ru-RU"),
-      items: order.items.map((it) => it.name + " (" + it.unit + ") ×" + it.qty).join("; "),
-      sum: order.sum,
-      score: order.score,
-      prize: order.prize ? order.prize.name : "нет",
-      code: order.prize ? order.prize.key.toUpperCase() + " · " + order.word : "—"
+  /* ---- отправка в павильон ---- */
+  function post(data, onOk, onFail) {
+    if (!CONFIG.sheetUrl) { onFail("offline"); return; }
+
+    const opts = {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(data)
     };
+
+    fetch(CONFIG.sheetUrl, opts)
+      .then((r) => { if (!r.ok) throw new Error("bad status"); return r.text(); })
+      .then(onOk)
+      .catch(() => fetch(CONFIG.sheetUrl, Object.assign({ mode: "no-cors" }, opts))
+        .then(onOk)
+        .catch(() => onFail("network")));
   }
 
   function sendOrder() {
     if (!CONFIG.sheetUrl) {
-      setStatus("ok", "Заказ собран. Покажите этот экран продавцу — он примет его на кассе.");
-      $("order-note").textContent = "Номер заказа и гостинец видны продавцу прямо здесь.";
+      shout("ok", "Заказ собран. Покажите этот экран продавцу.");
       return;
     }
 
-    setStatus("wait", "Отправляем заказ в павильон…");
-    const body = JSON.stringify(payload());
-    const opts = { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: body };
+    shout("wait", "Отправляем заказ в павильон…");
 
-    fetch(CONFIG.sheetUrl, opts)
-      .then((r) => { if (!r.ok) throw new Error("bad status"); return r.text(); })
-      .then(() => {
-        setStatus("ok", "Заказ принят павильоном — его уже собирают. Назовите номер на кассе.");
-      })
-      .catch(() => fetch(CONFIG.sheetUrl, Object.assign({ mode: "no-cors" }, opts))
-        .then(() => {
-          setStatus("ok", "Заказ отправлен в павильон. Назовите номер на кассе — если его вдруг не видно, покажите этот экран.");
-        })
-        .catch(() => {
-          setStatus("fail", "Не получилось отправить заказ автоматически. Просто покажите этот экран продавцу — здесь есть всё нужное.");
-        }));
+    post({
+      type: "order",
+      no: order.no,
+      time: new Date(order.at).toLocaleString("ru-RU"),
+      items: order.items.map((it) => it.name + " (" + it.unit + ") ×" + it.qty).join("; "),
+      sum: order.sum
+    },
+    () => shout("ok", "Заказ принят павильоном — его уже собирают. Назовите номер на кассе."),
+    (why) => shout("fail", why === "offline"
+      ? "Заказ собран. Покажите этот экран продавцу."
+      : "Заказ не ушёл автоматически — покажите этот экран продавцу, здесь есть всё нужное."));
+  }
+
+  function sendPrize() {
+    if (!CONFIG.sheetUrl) return;
+    post({
+      type: "prize",
+      no: order.no,
+      score: order.score,
+      prize: order.prize ? order.prize.name : "нет",
+      code: order.prize ? order.prize.key.toUpperCase() + " · " + order.word : "—"
+    }, () => {}, () => {});
+  }
+
+  function finishQuiz() {
+    order.score = score;
+    order.prize = CONFIG.prizes[score];
+    order.quizDone = true;
+    renderOrder();
+    show("scr-order", 2);
+    sendPrize();
   }
 
   /* ---- факты ---- */
@@ -1136,19 +1230,22 @@
   /* ---- переходы ---- */
   $("to-cart").addEventListener("click", () => { renderCart(); show("scr-cart", 0); });
   $("back-menu").addEventListener("click", () => show("scr-menu", 0));
-  $("to-quiz").addEventListener("click", startQuiz);
-  $("skip-quiz").addEventListener("click", () => makeOrder(false));
-  $("next").addEventListener("click", () => {
-    if (step === 2) { makeOrder(true); return; }
-    step++; renderQuestion(); window.scrollTo({ top: 0 });
-  });
-  $("facts-from-cart").addEventListener("click", () => openFacts("scr-cart", 0));
-  $("facts-from-order").addEventListener("click", () => openFacts("scr-order", 2));
-  $("facts-back").addEventListener("click", () => show(factsFrom, factsFromTrack));
-  $("restart").addEventListener("click", () => {
+  $("send-order").addEventListener("click", makeOrder);
+
+  $("hub-quiz").addEventListener("click", startQuiz);
+  $("hub-facts").addEventListener("click", () => openFacts("scr-order", 2));
+  $("hub-items").addEventListener("click", () => show("scr-items", 2));
+  $("hub-new").addEventListener("click", () => {
     Object.keys(cart).forEach((id) => delete cart[id]);
-    if (timerId) clearInterval(timerId);
     renderMenu(); refreshBar(); show("scr-menu", 0);
+  });
+
+  $("items-back").addEventListener("click", () => show("scr-order", 2));
+  $("facts-back").addEventListener("click", () => show(factsFrom, factsFromTrack));
+
+  $("next").addEventListener("click", () => {
+    if (step === 2) { finishQuiz(); return; }
+    step++; renderQuestion(); window.scrollTo({ top: 0 });
   });
 
   renderMenu();
