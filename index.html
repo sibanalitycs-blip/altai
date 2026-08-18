@@ -1,0 +1,770 @@
+<title>Три факта об Алтае</title>
+
+<style>
+  :root {
+    --ground: #EDF0E8;
+    --surface: #FBFCF8;
+    --surface-2: #E4EADC;
+    --ink: #17251D;
+    --ink-soft: #56645A;
+    --line: #CFD8C6;
+    --accent: #C9541A;
+    --accent-soft: #F6E2D5;
+    --honey: #B07D0E;
+    --good: #2C7048;
+    --good-soft: #DCEBDF;
+    --bad: #A33827;
+    --bad-soft: #F3DDD8;
+    --on-accent: #FFF6F0;
+    --shadow: 0 1px 2px rgba(23,37,29,.06), 0 8px 24px -12px rgba(23,37,29,.22);
+
+    --display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Noto Serif", serif;
+    --body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Roboto Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0F1913;
+      --surface: #17231B;
+      --surface-2: #1E2D24;
+      --ink: #E8EEE3;
+      --ink-soft: #9AA99D;
+      --line: #2A3B31;
+      --accent: #F0803C;
+      --accent-soft: #33211A;
+      --honey: #DFA93C;
+      --good: #66BB88;
+      --good-soft: #1B2E23;
+      --bad: #E2735E;
+      --bad-soft: #33201C;
+      --on-accent: #1A0E07;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 28px -14px rgba(0,0,0,.7);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0F1913;
+    --surface: #17231B;
+    --surface-2: #1E2D24;
+    --ink: #E8EEE3;
+    --ink-soft: #9AA99D;
+    --line: #2A3B31;
+    --accent: #F0803C;
+    --accent-soft: #33211A;
+    --honey: #DFA93C;
+    --good: #66BB88;
+    --good-soft: #1B2E23;
+    --bad: #E2735E;
+    --bad-soft: #33201C;
+    --on-accent: #1A0E07;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 28px -14px rgba(0,0,0,.7);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 20px 16px 40px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* --- шапка --- */
+  .masthead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 12px;
+  }
+  .brand {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .berries { display: flex; gap: 7px; align-items: center; }
+  .berry {
+    width: 11px; height: 11px; border-radius: 50%;
+    border: 1.5px solid var(--line);
+    background: transparent;
+    transition: background .35s ease, border-color .35s ease, transform .35s ease;
+  }
+  .berry.done { background: var(--accent); border-color: var(--accent); }
+  .berry.miss { background: var(--line); border-color: var(--line); }
+  .berry.now  { border-color: var(--accent); transform: scale(1.25); }
+
+  /* --- экраны --- */
+  .screen { display: none; flex-direction: column; gap: 22px; }
+  .screen.on { display: flex; animation: rise .45s cubic-bezier(.2,.7,.3,1) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(30px, 9vw, 38px);
+    line-height: 1.08;
+    letter-spacing: -.015em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+
+  .lede { margin: 0; color: var(--ink-soft); font-size: 16px; }
+
+  .sprig { display: block; width: 100%; height: auto; }
+
+  /* --- лестница скидок --- */
+  .ladder {
+    display: grid;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .rung {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--surface);
+    padding: 11px 14px;
+  }
+  .rung span:first-child { font-size: 15px; }
+  .rung b {
+    font-family: var(--mono);
+    font-size: 17px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+  }
+  .rung.top { background: var(--accent-soft); }
+  .rung b.none { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+
+  /* --- кнопки --- */
+  button {
+    font: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: inherit;
+  }
+  .go {
+    width: 100%;
+    background: var(--accent);
+    color: var(--on-accent);
+    padding: 16px;
+    border-radius: 4px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    transition: transform .12s ease, filter .2s ease;
+  }
+  .go:active { transform: scale(.985); }
+  .go:hover { filter: brightness(1.06); }
+  .ghost {
+    align-self: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    padding: 8px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* --- вопрос --- */
+  .qnum {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .qtext {
+    font-family: var(--display);
+    font-size: clamp(23px, 6.4vw, 27px);
+    line-height: 1.22;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt {
+    width: 100%;
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 14px 15px;
+    font-size: 16px;
+    line-height: 1.35;
+    box-shadow: var(--shadow);
+    transition: border-color .18s ease, background .18s ease, transform .12s ease;
+  }
+  .opt:hover:not(:disabled) { border-color: var(--accent); }
+  .opt:active:not(:disabled) { transform: scale(.99); }
+  .opt:disabled { cursor: default; box-shadow: none; }
+  .opt.right { background: var(--good-soft); border-color: var(--good); }
+  .opt.wrong { background: var(--bad-soft); border-color: var(--bad); }
+  .opt.dim { opacity: .45; }
+
+  .verdict {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-left: 3px solid var(--honey);
+    padding: 2px 0 2px 14px;
+    animation: rise .35s ease both;
+  }
+  .verdict .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .verdict.ok .tag { color: var(--good); }
+  .verdict.no .tag { color: var(--bad); }
+  .verdict p { margin: 0; font-size: 15px; color: var(--ink-soft); }
+
+  /* --- талон --- */
+  .coupon {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .coupon-top { padding: 26px 20px 22px; text-align: center; }
+  .coupon-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .percent {
+    font-family: var(--display);
+    font-size: 84px;
+    line-height: .95;
+    letter-spacing: -.03em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    margin: 10px 0 4px;
+    display: block;
+    animation: stamp .5s cubic-bezier(.2,1.5,.4,1) both;
+  }
+  @keyframes stamp { from { transform: scale(.7) rotate(-4deg); opacity: 0; } }
+  .percent small { font-size: 34px; letter-spacing: 0; }
+  .percent i {
+    font-family: var(--mono);
+    font-style: normal;
+    font-size: 40px;
+    vertical-align: .28em;
+    margin-right: .02em;
+  }
+
+  .perf {
+    position: relative;
+    height: 0;
+    border-top: 1.5px dashed var(--line);
+    margin: 0 0;
+  }
+  .perf::before, .perf::after {
+    content: "";
+    position: absolute;
+    top: -9px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--ground);
+    border: 1px solid var(--line);
+  }
+  .perf::before { left: -10px; }
+  .perf::after { right: -10px; }
+
+  .coupon-bottom { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .code {
+    font-family: var(--mono);
+    font-size: clamp(19px, 5.6vw, 23px);
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-align: center;
+    padding: 12px;
+    background: var(--surface-2);
+    border-radius: 3px;
+    word-break: break-all;
+  }
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .meta b { color: var(--accent); font-weight: 600; }
+  .expired .code { text-decoration: line-through; opacity: .5; }
+  .coupon.zero .perf, .coupon.zero .coupon-bottom { display: none; }
+  .coupon.zero .percent { color: var(--ink-soft); }
+
+  .recap { display: flex; flex-direction: column; gap: 14px; }
+  .recap h2 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 500;
+    margin: 0;
+  }
+  .recap-item {
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    font-size: 15px;
+    line-height: 1.4;
+    color: var(--ink-soft);
+  }
+  .recap-item .mark {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    flex: none;
+    width: 16px;
+    text-align: center;
+  }
+  .recap-item.ok .mark { color: var(--good); }
+  .recap-item.no .mark { color: var(--bad); }
+  .recap-item b { color: var(--ink); font-weight: 600; }
+
+  .fineprint {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin: 0;
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="app">
+
+  <header class="masthead">
+    <div class="brand" id="brand">Алтайский павильон</div>
+    <div class="berries" id="berries" aria-hidden="true">
+      <i class="berry"></i><i class="berry"></i><i class="berry"></i>
+    </div>
+  </header>
+
+  <!-- ЭКРАН 1 -->
+  <section class="screen on" id="scr-intro">
+    <svg class="sprig" viewBox="0 0 340 74" role="img" aria-label="Ветка облепихи">
+      <g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".55">
+        <path d="M8 60 C 70 58, 120 44, 180 30 S 300 12, 334 14"/>
+        <path d="M64 55 C 74 44, 90 40, 104 42"/>
+        <path d="M132 47 C 140 34, 156 28, 172 30"/>
+        <path d="M212 33 C 220 21, 236 16, 250 18"/>
+        <path d="M96 57 C 102 66, 114 70, 124 68"/>
+        <path d="M186 41 C 192 51, 204 55, 214 53"/>
+      </g>
+      <g fill="var(--accent)" opacity=".9">
+        <circle cx="60" cy="57" r="4.6"/><circle cx="78" cy="50" r="4"/><circle cx="98" cy="45" r="4.8"/>
+        <circle cx="119" cy="52" r="3.6"/><circle cx="140" cy="42" r="4.4"/><circle cx="161" cy="34" r="4.9"/>
+        <circle cx="180" cy="38" r="3.8"/><circle cx="201" cy="45" r="4.2"/><circle cx="221" cy="29" r="4.7"/>
+        <circle cx="243" cy="21" r="4.1"/><circle cx="264" cy="19" r="4.5"/><circle cx="287" cy="16" r="3.7"/>
+        <circle cx="309" cy="15" r="4.3"/>
+      </g>
+    </svg>
+
+    <h1>Три факта об Алтае — <em>и скидка на кассе</em></h1>
+    <p class="lede">Три вопроса о крае, откуда приехала наша еда. Каждый верный ответ — плюс к скидке на сегодняшнюю покупку. Займёт минуту.</p>
+
+    <div class="ladder">
+      <div class="rung top"><span>Все три ответа верны</span><b>−7%</b></div>
+      <div class="rung"><span>Два верных ответа</span><b>−5%</b></div>
+      <div class="rung"><span>Один верный ответ</span><b>−3%</b></div>
+      <div class="rung"><span>Ни одного верного</span><b class="none">без скидки</b></div>
+    </div>
+
+    <button class="go" id="start">Начать</button>
+    <p class="fineprint">Одна попытка в день с устройства. Талон показываете продавцу.</p>
+  </section>
+
+  <!-- ЭКРАН 2 -->
+  <section class="screen" id="scr-quiz">
+    <div class="qnum" id="qnum">Вопрос 1 из 3</div>
+    <h2 class="qtext" id="qtext"></h2>
+    <div class="options" id="options"></div>
+    <div id="verdict-slot"></div>
+    <button class="go" id="next" style="display:none">Дальше</button>
+  </section>
+
+  <!-- ЭКРАН 3 -->
+  <section class="screen" id="scr-result">
+    <div class="coupon" id="coupon">
+      <div class="coupon-top">
+        <div class="coupon-label" id="res-label">Ваша скидка</div>
+        <span class="percent" id="res-percent"><i>&minus;</i>15<small>%</small></span>
+        <div class="coupon-label" id="res-score">3 из 3 верных ответов</div>
+      </div>
+      <div class="perf"></div>
+      <div class="coupon-bottom">
+        <div class="code" id="res-code">АЛТАЙ-15-КЕДР</div>
+        <div class="meta">
+          <span id="res-date">18.08</span>
+          <span>Действует <b id="res-timer">15:00</b></span>
+        </div>
+      </div>
+    </div>
+
+    <p class="fineprint" id="res-note">Покажите этот экран продавцу до конца отсчёта.</p>
+
+    <div class="recap">
+      <h2>Что вы теперь знаете об Алтае</h2>
+      <div id="recap-list"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // Телефон: страницу открывают по QR, поэтому масштаб задаём явно
+  if (!document.querySelector('meta[name="viewport"]')) {
+    const mv = document.createElement("meta");
+    mv.name = "viewport";
+    mv.content = "width=device-width, initial-scale=1, viewport-fit=cover";
+    document.head.appendChild(mv);
+  }
+
+  /* ================= НАСТРОЙКИ ПАВИЛЬОНА =================
+     Меняйте только этот блок. */
+  const CONFIG = {
+    pavilion: "Алтайский павильон",   // название в шапке
+    discounts: [0, 3, 5, 7],          // скидка за 0, 1, 2, 3 верных ответа
+    minutesValid: 15,                 // сколько минут живёт талон
+    oneTryPerDay: true                // одна попытка в день с устройства
+  };
+
+  /* Слово дня: продавец сверяет его со своей табличкой на неделю.
+     Меняется каждые сутки, поэтому вчерашний скриншот не подойдёт. */
+  const WORDS = ["КЕДР","МАРАЛ","ОБЛЕПИХА","ГРЕЧКА","БЕРЁЗА","ПАСЕКА","КАТУНЬ","БИЯ",
+                 "МЁД","СЫРОВАР","ПОЛЫНЬ","ЛУГ","АЛТАЙ","ЗЕРНО","ТАЙГА","СОЛОНЦЫ",
+                 "МУКА","КОРЕНЬ","РОДНИК","ПАНТЫ","ЗАКВАСКА","СВЁКЛА","ЯГОДА","ПОЛЕ"];
+
+  /* ================= ВОПРОСЫ =================
+     Каждый раз игроку выпадают 3 случайных из этого набора. */
+  const POOL = [
+    {
+      q: "Какую крупу Алтайский край собирает больше всех в России?",
+      opts: ["Гречиху", "Рис", "Пшено"],
+      right: 0,
+      fact: "Алтай даёт около половины всей российской гречихи — в 2025 году здесь собрали 585 тысяч тонн. Первое место в стране, и держат его год за годом.",
+      short: "Алтай — гречишная столица России"
+    },
+    {
+      q: "Какое место в России Алтайский край занимает по производству муки и круп?",
+      opts: ["Первое", "Двадцатое", "Он их вообще не производит"],
+      right: 0,
+      fact: "Первое. Алтайский край — главная мельница страны: муку, крупы и хлопья отсюда везут по всей России.",
+      short: "Алтай — первое место по муке и крупам"
+    },
+    {
+      q: "Где стоит единственный за Уралом завод, который делает сахар из свёклы?",
+      opts: ["В Алтайском крае", "В Приморье", "На Камчатке"],
+      right: 0,
+      fact: "В селе Черемное Павловского района. Весь сахар из свёклы восточнее Урала — алтайский, другого такого завода за Уралом просто нет.",
+      short: "Весь сахар за Уралом — алтайский"
+    },
+    {
+      q: "Какая ягода стала официальным брендом Алтайского края?",
+      opts: ["Облепиха", "Клюква", "Арбуз"],
+      right: 0,
+      fact: "Облепиха. Она занимает около 80% всех плодово-ягодных посадок края, а алтайские селекционеры вывели самые крупноплодные сорта в мире.",
+      short: "Облепиха — официальная ягода края"
+    },
+    {
+      q: "Что означает надпись «Алтайский мёд» на банке?",
+      opts: [
+        "Защищённое место происхождения — как шампанское",
+        "Просто красивое слово, его может писать кто угодно",
+        "Сорт пчёл"
+      ],
+      right: 0,
+      fact: "«Алтайский мёд» — зарегистрированное наименование места происхождения. Писать так на банке имеют право только проверенные пасеки края.",
+      short: "«Алтайский мёд» защищён законом"
+    },
+    {
+      q: "Где начинается Обь — самая длинная река России?",
+      opts: [
+        "В Алтайском крае, у Бийска",
+        "Под Москвой",
+        "В Карелии"
+      ],
+      right: 0,
+      fact: "Под Бийском сливаются Бия и Катунь — и с этого места начинается Обь, 3650 километров до Северного Ледовитого океана.",
+      short: "Обь начинается на Алтае"
+    },
+    {
+      q: "В Алтайском крае нашли пещеру, где жил неизвестный науке вид древних людей. Как их назвали?",
+      opts: ["Денисовцы", "Викинги", "Ацтеки"],
+      right: 0,
+      fact: "Денисова пещера в Солонешенском районе. По найденной там косточке учёные открыли целый вид древнего человека — денисовского. В пещере 22 культурных слоя, нижнему около 280 тысяч лет.",
+      short: "Денисова пещера — родина «денисовцев»"
+    },
+    {
+      q: "Кто из них родился в Алтайском крае?",
+      opts: ["Василий Шукшин", "Юрий Гагарин", "Пётр Первый"],
+      right: 0,
+      fact: "Шукшин — из села Сростки. А ещё край дал стране второго космонавта Германа Титова и оружейника Михаила Калашникова.",
+      short: "Шукшин и Титов — земляки алтайской еды"
+    },
+    {
+      q: "Знаменитый сыр «Советский» придумали…",
+      opts: ["На Алтае в 1932 году", "В Швейцарии", "В Москве в 1980-м"],
+      right: 0,
+      fact: "Рецепт создал сыродел Дмитрий Граников на алтайских маслосырзаводах: швейцарская технология в предгорьях не работала, и здесь придумали свою. Пробную партию отправили в Лондон — оценили на 90–95 баллов из 100.",
+      short: "Сыр «Советский» родом с Алтая"
+    },
+    {
+      q: "Панты, которыми славится Алтай, — это…",
+      opts: [
+        "Молодые рога марала",
+        "Порода коров",
+        "Вид грибов"
+      ],
+      right: 0,
+      fact: "Молодые неокостеневшие рога марала. Алтай — главный мараловодческий район страны, а пантовые ванны и экстракты знают далеко за его пределами.",
+      short: "Панты — молодые рога марала"
+    }
+  ];
+
+  /* ================= ЛОГИКА ================= */
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, "0");
+  const todayKey = () => { const d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
+  const dayIndex = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000);
+  const wordOfDay = () => WORDS[dayIndex() % WORDS.length];
+
+  const store = {
+    get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+
+  const shuffle = (arr) => {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  $("brand").textContent = CONFIG.pavilion;
+
+  let quiz = [];      // три вопроса этой игры
+  let step = 0;
+  let score = 0;
+  let log = [];       // что ответили — для итогового списка
+  let timerId = null;
+
+  function show(id) {
+    document.querySelectorAll(".screen").forEach((s) => s.classList.remove("on"));
+    $(id).classList.add("on");
+    window.scrollTo({ top: 0, behavior: "instant" in document.documentElement.style ? "instant" : "auto" });
+  }
+
+  function paintBerries() {
+    const dots = $("berries").children;
+    for (let i = 0; i < 3; i++) {
+      const b = dots[i];
+      b.className = "berry";
+      const rec = log[i];
+      if (rec) b.classList.add(rec.ok ? "done" : "miss");
+      else if (i === step) b.classList.add("now");
+    }
+  }
+
+  function buildQuiz() {
+    quiz = shuffle(POOL).slice(0, 3).map((item) => {
+      const order = shuffle(item.opts.map((text, i) => ({ text, ok: i === item.right })));
+      return { q: item.q, fact: item.fact, short: item.short, order: order };
+    });
+    step = 0; score = 0; log = [];
+  }
+
+  function renderQuestion() {
+    const item = quiz[step];
+    $("qnum").textContent = "Вопрос " + (step + 1) + " из 3";
+    $("qtext").textContent = item.q;
+    $("verdict-slot").innerHTML = "";
+    $("next").style.display = "none";
+    paintBerries();
+
+    const box = $("options");
+    box.innerHTML = "";
+    item.order.forEach((o) => {
+      const btn = document.createElement("button");
+      btn.className = "opt";
+      btn.type = "button";
+      btn.textContent = o.text;
+      btn.addEventListener("click", () => answer(btn, o.ok));
+      box.appendChild(btn);
+    });
+  }
+
+  function answer(btn, ok) {
+    const item = quiz[step];
+    const all = Array.from($("options").children);
+    all.forEach((b, i) => {
+      b.disabled = true;
+      const isRight = item.order[i].ok;
+      if (isRight) b.classList.add("right");
+      else if (b === btn) b.classList.add("wrong");
+      else b.classList.add("dim");
+    });
+
+    if (ok) score++;
+    log.push({ ok: ok, short: item.short });
+    paintBerries();
+
+    const v = document.createElement("div");
+    v.className = "verdict " + (ok ? "ok" : "no");
+    const tag = document.createElement("div");
+    tag.className = "tag";
+    tag.textContent = ok ? "Верно" : "Мимо";
+    const p = document.createElement("p");
+    p.textContent = item.fact;
+    v.appendChild(tag); v.appendChild(p);
+    $("verdict-slot").appendChild(v);
+
+    const next = $("next");
+    next.textContent = step === 2 ? "Показать скидку" : "Дальше";
+    next.style.display = "block";
+  }
+
+  function finish() {
+    const percent = CONFIG.discounts[score];
+    const until = Date.now() + CONFIG.minutesValid * 60000;
+    const ticket = {
+      day: todayKey(),
+      percent: percent,
+      score: score,
+      until: until,
+      code: "АЛТАЙ-" + percent + "-" + wordOfDay(),
+      log: log
+    };
+    if (CONFIG.oneTryPerDay) store.set("altai-quiz-ticket", ticket);
+    showTicket(ticket);
+  }
+
+  function showTicket(t) {
+    const zero = !t.percent;
+    $("coupon").classList.toggle("zero", zero);
+    $("res-label").textContent = zero ? "Сегодня без скидки" : "Ваша скидка";
+    $("res-percent").innerHTML = zero
+      ? "0<small>%</small>"
+      : "<i>&minus;</i>" + t.percent + "<small>%</small>";
+    const WORDING = [
+      "Ни одного верного ответа",
+      "1 верный ответ из 3",
+      "2 верных ответа из 3",
+      "Все три ответа верны"
+    ];
+    $("res-score").textContent = WORDING[t.score];
+    $("res-code").textContent = t.code;
+
+    const d = new Date(t.until);
+    $("res-date").textContent = pad(d.getDate()) + "." + pad(d.getMonth() + 1);
+
+    const list = $("recap-list");
+    list.innerHTML = "";
+    (t.log || []).forEach((r) => {
+      const row = document.createElement("div");
+      row.className = "recap-item " + (r.ok ? "ok" : "no");
+      const m = document.createElement("span");
+      m.className = "mark";
+      m.textContent = r.ok ? "✓" : "•";
+      const txt = document.createElement("span");
+      txt.textContent = r.short;
+      row.appendChild(m); row.appendChild(txt);
+      list.appendChild(row);
+    });
+
+    if (zero) {
+      if (timerId) clearInterval(timerId);
+      $("res-note").textContent = "Ничего страшного: три факта об Алтае вы теперь знаете. Завтра можно сыграть снова.";
+    } else {
+      tick(t.until);
+      if (timerId) clearInterval(timerId);
+      timerId = setInterval(() => tick(t.until), 1000);
+    }
+    show("scr-result");
+  }
+
+  function tick(until) {
+    const left = until - Date.now();
+    const el = $("res-timer");
+    if (left <= 0) {
+      el.textContent = "истёк";
+      $("coupon").classList.add("expired");
+      $("res-note").textContent = "Срок талона вышел. Подойдите к продавцу и сыграйте заново.";
+      if (timerId) clearInterval(timerId);
+      return;
+    }
+    const m = Math.floor(left / 60000);
+    const s = Math.floor((left % 60000) / 1000);
+    el.textContent = m + ":" + pad(s);
+  }
+
+  $("start").addEventListener("click", () => {
+    buildQuiz();
+    renderQuestion();
+    show("scr-quiz");
+  });
+
+  $("next").addEventListener("click", () => {
+    if (step === 2) { finish(); return; }
+    step++;
+    renderQuestion();
+    window.scrollTo({ top: 0 });
+  });
+
+  // Уже играли сегодня — показываем тот же талон, а не новую скидку
+  const saved = store.get("altai-quiz-ticket");
+  if (CONFIG.oneTryPerDay && saved && saved.day === todayKey()) {
+    showTicket(saved);
+    $("res-note").textContent = "Вы уже играли сегодня — это ваш талон. Следующая игра завтра.";
+    log = saved.log || [];
+    paintBerries();
+  }
+})();
+</script>
