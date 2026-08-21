@@ -1,4 +1,5 @@
-<title>Меню и квиз павильона</title>
+<meta charset="utf-8">
+<title>Меню павильона</title>
 
 <style>
   :root {
@@ -134,6 +135,12 @@
     transition: border-color .2s ease;
   }
   .item.picked { border-color: var(--accent); }
+  .item.soon { background: var(--surface-2); }
+  .item .soon-note {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-soft); text-align: right;
+    max-width: 74px; line-height: 1.25;
+  }
 
   .art {
     grid-row: 1 / span 2; grid-column: 1;
@@ -234,6 +241,25 @@
   .pitch b { font-family: var(--display); font-size: 19px; font-weight: 400; }
   .pitch p { margin: 0; font-size: 14px; color: var(--ink-soft); }
 
+  /* --- имя покупателя --- */
+  .name-field {
+    width: 100%;
+    font: inherit;
+    font-size: 22px;
+    font-family: var(--display);
+    text-align: center;
+    padding: 16px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--ink);
+  }
+  .name-field::placeholder { color: var(--ink-soft); opacity: .6; font-size: 18px; }
+  .name-field:focus { outline: none; border-color: var(--accent); }
+  .name-hint { font-size: 14px; color: var(--ink-soft); margin: 0; text-align: center; }
+  .name-error { color: var(--alarm); font-size: 14px; margin: 0; text-align: center; display: none; }
+  .name-error.on { display: block; }
+
   /* --- квиз --- */
   .berries { display: flex; gap: 6px; }
   .berry {
@@ -276,7 +302,8 @@
   }
   .ticket-top { padding: 22px 20px 18px; text-align: center; display: flex; flex-direction: column; gap: 6px; }
   .order-no {
-    font-family: var(--display); font-size: 50px; line-height: 1; letter-spacing: -.02em;
+    font-family: var(--display); font-size: clamp(32px, 11vw, 46px);
+    word-break: break-word; line-height: 1; letter-spacing: -.02em;
     color: var(--accent); font-variant-numeric: tabular-nums;
     animation: stamp .45s cubic-bezier(.2,1.5,.4,1) both;
   }
@@ -317,6 +344,7 @@
     text-wrap: balance;
   }
   .shout.wait { color: var(--ink-soft); font-size: 17px; }
+  .shout.note { font-size: clamp(23px, 6.2vw, 27px); }
 
   /* --- плитки сценариев --- */
   .hub { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -344,6 +372,10 @@
   .hub-btn.main { border-color: var(--accent); background: var(--accent-soft); }
   .hub-btn.main .ico { background: var(--surface); }
   .hub-btn.done { opacity: .5; }
+  .hub-btn.wide { grid-column: span 2; flex-direction: row; justify-content: center; gap: 14px; }
+  .hub-btn.wide .ico { width: 46px; height: 46px; }
+  .hub-btn.wide .ico svg { width: 34px; height: 34px; }
+  .hub-btn.wide div { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
 
   .code {
     font-family: var(--mono); font-size: 16px; font-weight: 600; letter-spacing: .05em;
@@ -402,14 +434,14 @@
   <header class="masthead">
     <div class="brand" id="brand">Алтайский павильон</div>
     <div class="track" id="track">
-      <span class="on">меню</span><i>›</i><span>заказ</span><i>›</i><span>комплимент</span>
+      <span class="on">меню</span><i>›</i><span>заказ</span><i>›</i><span id="track-3">вопросы</span>
     </div>
   </header>
 
   <!-- 1. МЕНЮ -->
   <section class="screen on" id="scr-menu">
-    <h1>Соберите заказ — <em>а комплимент выиграйте</em></h1>
-    <p class="lede">Отметьте, что берёте. После сборки заказа откроются три вопроса об Алтае: чем больше верных ответов, тем весомее гостинец от павильона.</p>
+    <h1 id="menu-title">Соберите заказ — <em>а край узнайте</em></h1>
+    <p class="lede" id="menu-lede">Отметьте, что берёте. Пока заказ собирают, откроются три вопроса о крае, откуда эта еда.</p>
     <div id="catalog"></div>
     <p class="fineprint center">Цены указаны за единицу товара. Оплата на кассе павильона.</p>
   </section>
@@ -424,12 +456,24 @@
     <div class="pitch">
       <div class="art" id="pitch-art"></div>
       <div>
-        <b>После заказа — квиз</b>
-        <p>Пока собирают заказ, ответьте на три вопроса об Алтае: лимонад, кедровая шишка или кусочек сыра в подарок.</p>
+        <b id="pitch-title">После заказа — три вопроса</b>
+        <p id="pitch-text">Пока собирают заказ, ответьте на три вопроса о крае.</p>
       </div>
     </div>
     <button class="go wide" id="send-order">Отправить заказ в павильон</button>
     <button class="flat" id="back-menu">Добавить ещё что-нибудь</button>
+  </section>
+
+  <!-- ИМЯ ПОКУПАТЕЛЯ -->
+  <section class="screen" id="scr-name">
+    <h1>Как вас зовут?</h1>
+    <p class="lede">Продавец назовёт это имя, когда заказ будет готов. Номера не нужны.</p>
+    <input class="name-field" id="name-input" type="text" inputmode="text"
+           autocomplete="given-name" maxlength="24" placeholder="Например, Мария">
+    <p class="name-error" id="name-error">Напишите имя — по нему вас позовут</p>
+    <p class="name-hint">Достаточно имени. Фамилия и телефон не нужны.</p>
+    <button class="go wide" id="name-send">Отправить заказ в павильон</button>
+    <button class="flat" id="name-back">Вернуться к заказу</button>
   </section>
 
   <!-- 3. КВИЗ -->
@@ -448,8 +492,8 @@
   <section class="screen" id="scr-order">
     <div class="ticket">
       <div class="ticket-top">
-        <div class="label">Заказ</div>
-        <div class="order-no" id="order-no">№ 1847-21</div>
+        <div class="label">Заказ для</div>
+        <div class="order-no" id="order-no">Мария</div>
         <div class="label" id="order-when">18.08 · 18:47</div>
       </div>
       <div class="perf"></div>
@@ -462,8 +506,8 @@
     <div class="hub" id="hub">
       <button class="hub-btn main" id="hub-quiz">
         <span class="ico" id="ico-quiz"></span>
-        <b>Пройти квиз</b>
-        <small>получить комплимент</small>
+        <b>Три вопроса</b>
+        <small>о крае, откуда еда</small>
       </button>
       <button class="hub-btn" id="hub-facts">
         <span class="ico" id="ico-facts"></span>
@@ -485,20 +529,20 @@
 
   <!-- СОСТАВ ЗАКАЗА -->
   <section class="screen" id="scr-items">
-    <h1>Состав заказа <em id="items-no">№ —</em></h1>
+    <h1>Заказ для <em id="items-no">—</em></h1>
     <div class="lines" id="order-lines"></div>
     <div class="totals">
       <div class="trow final"><span>К оплате</span><span id="o-final">0 ₽</span></div>
     </div>
     <div class="code" id="order-code">СЫР · ПАНТЫ</div>
-    <div class="meta"><span id="o-score">квиз не пройден</span><span id="o-when-line">—</span></div>
+    <div class="meta"><span id="o-score">на вопросы не отвечали</span><span id="o-when-line">—</span></div>
     <button class="go wide" id="items-back">Вернуться к заказу</button>
   </section>
 
   <!-- ФАКТЫ -->
   <section class="screen" id="scr-facts">
     <h1>Что вы, скорее всего, <em>не знали об Алтае</em></h1>
-    <p class="lede">Десять фактов о крае, откуда приехала эта еда.</p>
+    <p class="lede">10 фактов о крае, откуда приехала эта еда.</p>
     <div class="facts-grid" id="facts-grid"></div>
     <button class="go wide" id="facts-back">Вернуться к заказу</button>
   </section>
@@ -528,6 +572,7 @@
 
   /* ============ НАСТРОЙКИ ПАВИЛЬОНА ============ */
   const CONFIG = {
+    quiz: false,
     pavilion: "Алтайский павильон",
 
     /* Адрес веб-приложения Google Apps Script — сюда падают заказы.
@@ -537,9 +582,9 @@
     /* Комплимент за 0, 1, 2 и 3 верных ответа */
     prizes: [
       null,
-      { key: "лимонад", name: "Алтайский лимонад", note: "Бутылочка на дорогу", art: "soda" },
-      { key: "шишка",   name: "Кедровая шишка",    note: "Целая, с орешками",  art: "cone" },
-      { key: "сыр",     name: "Кусочек сыра",      note: "Тот самый, алтайский", art: "wedge" }
+      null,
+      null,
+      null
     ]
   };
 
@@ -547,30 +592,26 @@
      Замените названия, фасовки и цены на свои. Поле art — какая рисуется картинка:
      jar · bottle · soda · wedge · butter · sack · box · nuts · cone */
   const MENU = [
-    { cat: "Мёд и пасека", items: [
-      { id: "m1", name: "Мёд гречишный", unit: "банка 0,5 кг", price: 650, art: "jar", tone: "#8A4A12" },
-      { id: "m2", name: "Мёд разнотравье", unit: "банка 0,5 кг", price: 590, art: "jar", tone: "#D79A18" },
-      { id: "m3", name: "Мёд с прополисом", unit: "банка 0,25 кг", price: 480, art: "jar", tone: "#B5761A" }
+    { cat: "Блюда", items: [
+      { id: "p1", name: "Салат", unit: "порция", price: 400, art: "salad", tone: "#B9A98C" },
+      { id: "p2", name: "Подба", unit: "порция", price: 1200, art: "soup", tone: "#B9A98C" },
+      { id: "p3", name: "Бургер", unit: "штука", price: 340, art: "burger", tone: "#C9873A" },
+      { id: "p4", name: "Стейк", unit: "порция", price: 1200, art: "steak", tone: "#8A4A2A" },
+      { id: "p5", name: "Сыр гриль", unit: "порция", price: 500, art: "grill", tone: "#E3B347" },
+      { id: "p6", name: "Лепёшка", unit: "штука", price: 250, art: "bread", tone: "#D9B87A" },
+      { id: "p7", name: "Сыр папоротник", unit: "порция", price: 1, art: "wedge", tone: "#E3B347" },
+      { id: "p8", name: "Сыр сливочный", unit: "порция", price: 1, art: "butter", tone: "#F2D98A" },
+      { id: "p9", name: "Мраморная говядина", unit: "порция", price: 1, art: "beef", tone: "#A8443A" }
     ]},
-    { cat: "Сыры и молочное", items: [
-      { id: "s1", name: "Сыр «Советский»", unit: "кусок 300 г", price: 520, art: "wedge", tone: "#E3B347" },
-      { id: "s2", name: "Сыр алтайский полутвёрдый", unit: "кусок 300 г", price: 430, art: "wedge", tone: "#EFCB74" },
-      { id: "s3", name: "Масло сливочное 82,5%", unit: "180 г", price: 260, art: "butter", tone: "#F2D98A" }
-    ]},
-    { cat: "Крупы и мука", items: [
-      { id: "k1", name: "Гречка ядрица", unit: "пакет 900 г", price: 130, art: "sack", tone: "#8C6A4A" },
-      { id: "k2", name: "Мука пшеничная в/с", unit: "пакет 2 кг", price: 160, art: "sack", tone: "#D8CBB4" },
-      { id: "k3", name: "Хлопья овсяные", unit: "пакет 500 г", price: 95, art: "sack", tone: "#C6B187" }
-    ]},
-    { cat: "Облепиха и травы", items: [
-      { id: "o1", name: "Облепиха, протёртая с сахаром", unit: "банка 500 г", price: 420, art: "jar", tone: "#E1741B" },
-      { id: "o2", name: "Облепиховое масло", unit: "флакон 100 мл", price: 590, art: "bottle", tone: "#E28A22" },
-      { id: "o3", name: "Чай травяной «Алтайский луг»", unit: "коробка 50 г", price: 280, art: "box", tone: "#5B7A4B" }
-    ]},
-    { cat: "Тайга", items: [
-      { id: "t1", name: "Кедровые орехи очищенные", unit: "пакет 200 г", price: 690, art: "nuts", tone: "#B98A52" },
-      { id: "t2", name: "Иван-чай ферментированный", unit: "пакет 100 г", price: 350, art: "box", tone: "#8A5A7A" },
-      { id: "t3", name: "Бальзам «Алтайский»", unit: "бутылка 250 мл", price: 890, art: "bottle", tone: "#4C3A2A" }
+    { cat: "Напитки", items: [
+      { id: "p10", name: "Чага", unit: "стакан", price: 50, art: "mushroom", tone: "#5A4432" },
+      { id: "p11", name: "Вода", unit: "бутылка", price: 50, art: "water", tone: "#6E93A6" },
+      { id: "p12", name: "Пихта", unit: "стакан", price: 250, art: "tea", tone: "#6E8A4B" },
+      { id: "p13", name: "Облепиха", unit: "стакан", price: 250, art: "berrydrink", tone: "#E1741B" },
+      { id: "p14", name: "Алтай", unit: "стакан", price: 250, art: "tea", tone: "#6E8A4B" },
+      { id: "p15", name: "Кофе классический", unit: "чашка", price: 250, art: "coffee", tone: "#5A4032" },
+      { id: "p16", name: "Кофе кхи", unit: "чашка", price: 350, art: "coffee", tone: "#5A4032" },
+      { id: "p17", name: "Кофе кхи с пихтой", unit: "чашка", price: 350, art: "coffee", tone: "#5A4032" }
     ]}
   ];
 
@@ -683,6 +724,108 @@
       <path d="M15 28.5c1.6-1.4 3.4-1.8 5-1.4" stroke="#FBFCF8" stroke-width="1.2" fill="none" opacity=".55"/>
       <path d="M26 26.6c1.6-1.4 3.4-1.8 5-1.4" stroke="#FBFCF8" stroke-width="1.2" fill="none" opacity=".5"/>`,
 
+    salad: (c) => `
+      <ellipse cx="24" cy="21" rx="15" ry="6" fill="${c}" opacity=".35"/>
+      <ellipse cx="18" cy="19" rx="7" ry="4.6" fill="#5B7A4B" transform="rotate(-18 18 19)"/>
+      <ellipse cx="29" cy="18.5" rx="6.5" ry="4.2" fill="#6E8A4B" transform="rotate(14 29 18.5)"/>
+      <ellipse cx="24" cy="15.5" rx="5.5" ry="3.6" fill="#4F6B41"/>
+      <circle cx="31" cy="21" r="3" fill="#C9541A"/>
+      <circle cx="16" cy="22" r="2.4" fill="#D96C2C"/>
+      <path d="M7 23h34v2a17 17 0 0 1-34 0z" fill="${c}"/>
+      <path d="M7 23h34v2a17 17 0 0 1-34 0z" fill="#FBFCF8" opacity=".16"/>
+      <path d="M11 30c2.6 5 7.4 8 13 8" stroke="#FBFCF8" stroke-width="1.6" fill="none" opacity=".45"/>`,
+
+    soup: (c) => `
+      <g stroke="${c}" stroke-width="2" fill="none" stroke-linecap="round" opacity=".55">
+        <path d="M17 15c2.5-3-2-4.5 0-7.5M24 13.5c2.5-3-2-4.5 0-7.5M31 15c2.5-3-2-4.5 0-7.5"/>
+      </g>
+      <ellipse cx="24" cy="23" rx="17" ry="5" fill="${c}" opacity=".5"/>
+      <path d="M7 23h34v2.5a17 17 0 0 1-34 0z" fill="${c}"/>
+      <ellipse cx="24" cy="23" rx="13.5" ry="3.6" fill="#8A4A2A" opacity=".75"/>
+      <path d="M11 30c2.6 5 7.4 8 13 8" stroke="#FBFCF8" stroke-width="1.6" fill="none" opacity=".45"/>`,
+
+    burger: (c) => `
+      <path d="M9 21a15 11 0 0 1 30 0z" fill="${c}"/>
+      <g fill="#FBFCF8" opacity=".75">
+        <ellipse cx="18" cy="15" rx="1.6" ry="1"/><ellipse cx="26" cy="13.5" rx="1.6" ry="1"/>
+        <ellipse cx="32" cy="17" rx="1.6" ry="1"/>
+      </g>
+      <path d="M8 22h32c0 3.2-4 2-6.4 3.2s-4-1-6.4 0-4 2-6.4 1-4-2-6.4-1S8 25.2 8 22z" fill="#5B7A4B"/>
+      <rect x="9.5" y="26" width="29" height="7" rx="3.5" fill="#7A4A22"/>
+      <rect x="11" y="27.5" width="26" height="2" rx="1" fill="#FBFCF8" opacity=".16"/>
+      <path d="M9 34h30a12 8 0 0 1-30 0z" fill="${c}" opacity=".85"/>`,
+
+    steak: (c) => `
+      <path d="M11 17c6-6 21-6.5 27-.5 4.5 4.5 2.5 13-4.5 15.5-7.5 2.6-18 2.2-23.5-1.5-5-3.4-3.5-9.5 1-13.5z" fill="${c}"/>
+      <path d="M12.5 16.5c7-5 17-5.5 24 .5" stroke="#F2D98A" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+      <g stroke="#3A2415" stroke-width="2" opacity=".38" stroke-linecap="round">
+        <path d="M15 24l14 6M21 21l13 6M17 29l11 4"/>
+      </g>`,
+
+    grill: (c) => `
+      <rect x="8" y="15" width="32" height="19" rx="3" fill="${c}"/>
+      <rect x="8" y="15" width="32" height="5" rx="3" fill="#FBFCF8" opacity=".22"/>
+      <g stroke="#8A5A18" stroke-width="2.4" opacity=".45" stroke-linecap="round">
+        <path d="M13 32l8-13M23 33l8-14M32 32l6-10"/>
+      </g>
+      <circle cx="17" cy="26" r="2" fill="#FBFCF8" opacity=".6"/>
+      <circle cx="30" cy="24" r="1.6" fill="#FBFCF8" opacity=".5"/>`,
+
+    bread: (c) => `
+      <circle cx="24" cy="24" r="15" fill="${c}"/>
+      <circle cx="24" cy="24" r="10.5" fill="#FBFCF8" opacity=".18"/>
+      <g fill="#8A5A2A" opacity=".45">
+        <circle cx="20" cy="20" r="1.6"/><circle cx="27" cy="22" r="1.3"/>
+        <circle cx="23" cy="28" r="1.5"/><circle cx="30" cy="28" r="1.2"/><circle cx="17" cy="27" r="1.2"/>
+      </g>
+      <path d="M12 19c3-3.6 7-5.4 11-5.6" stroke="#FBFCF8" stroke-width="1.8" fill="none" opacity=".5"/>`,
+
+    beef: (c) => `
+      <path d="M10 15h24a5 5 0 0 1 5 5v9a5 5 0 0 1-5 5H10a3 3 0 0 1-3-3V18a3 3 0 0 1 3-3z" fill="${c}"/>
+      <g stroke="#FBFCF8" stroke-width="1.5" fill="none" opacity=".65" stroke-linecap="round">
+        <path d="M12 21c4 1 6-1 9 0s5 2 8 1M11 27c4-1 6 1 10 0s6-2 9-1M16 18c1 4-1 7 0 11M26 17c1 4-1 8 0 12"/>
+      </g>
+      <path d="M34 15a5 5 0 0 1 5 5v9a5 5 0 0 1-5 5z" fill="#F2D98A" opacity=".8"/>`,
+
+    coffee: (c) => `
+      <path d="M10 14h23v11a11.5 11.5 0 0 1-23 0z" fill="${c}"/>
+      <path d="M33 17h3.5a5.5 5.5 0 0 1 0 11H33" stroke="${c}" stroke-width="3" fill="none"/>
+      <ellipse cx="21.5" cy="14.5" rx="11.5" ry="3.4" fill="#E8D9C4"/>
+      <ellipse cx="21.5" cy="14.5" rx="7" ry="1.9" fill="#FBFCF8" opacity=".7"/>
+      <ellipse cx="22" cy="39" rx="16" ry="3.4" fill="${c}" opacity=".45"/>`,
+
+    tea: (c) => `
+      <path d="M15 11h18l-1.6 25a4.5 4.5 0 0 1-4.5 4.2h-5.8A4.5 4.5 0 0 1 16.6 36z" fill="${c}" opacity=".9"/>
+      <path d="M16.4 19h15.2l-1.2 17a4.5 4.5 0 0 1-4.5 4.2h-5.8A4.5 4.5 0 0 1 17.6 36z" fill="${c}"/>
+      <path d="M18.5 22.5c.8 0 1.3.6 1.3 1.3v9a1.3 1.3 0 1 1-2.6 0v-9c0-.7.6-1.3 1.3-1.3z" fill="#FBFCF8" opacity=".4"/>
+      <path d="M24 18c3-4 6-5 9-5-1 4-4 6-9 5z" fill="#5B7A4B"/>
+      <path d="M24 18c-2.4-3-5-4-7.6-4 .8 3.4 3.4 5 7.6 4z" fill="#6E8A4B"/>`,
+
+    berrydrink: (c) => `
+      <path d="M15 11h18l-1.6 25a4.5 4.5 0 0 1-4.5 4.2h-5.8A4.5 4.5 0 0 1 16.6 36z" fill="${c}" opacity=".35"/>
+      <path d="M16.6 19h14.8l-1.2 17a4.5 4.5 0 0 1-4.5 4.2h-5.8A4.5 4.5 0 0 1 17.6 36z" fill="${c}"/>
+      <g fill="#A8340E" opacity=".65">
+        <circle cx="21" cy="26" r="2.4"/><circle cx="27" cy="30" r="2"/><circle cx="23.5" cy="33" r="1.8"/>
+      </g>
+      <path d="M18.6 22.5c.8 0 1.3.6 1.3 1.3v8a1.3 1.3 0 1 1-2.6 0v-8c0-.7.6-1.3 1.3-1.3z" fill="#FBFCF8" opacity=".45"/>
+      <path d="M24 11c1.6-3 4-4.4 6.6-4.6-.6 3-2.8 4.6-6.6 4.6z" fill="#5B7A4B"/>`,
+
+    mushroom: (c) => `
+      <path d="M9 25c0-8.5 6.7-15 15-15s15 6.5 15 15z" fill="${c}"/>
+      <path d="M13 22c1.4-5 6-8.6 11-8.6" stroke="#FBFCF8" stroke-width="1.8" fill="none" opacity=".35"/>
+      <g fill="#FBFCF8" opacity=".28">
+        <circle cx="18" cy="19" r="2.4"/><circle cx="28" cy="17" r="2"/><circle cx="32" cy="22" r="1.6"/>
+      </g>
+      <path d="M19 25h10v9a5 5 0 0 1-10 0z" fill="#CBB89A"/>
+      <path d="M19 25h10v3H19z" fill="#8A7458" opacity=".5"/>`,
+
+    water: (c) => `
+      <path d="M21 7h6v5h-6z" fill="${c}" opacity=".55"/>
+      <path d="M20.5 12c0 3-5 4.5-5 9v13a5 5 0 0 0 5 5h7a5 5 0 0 0 5-5V21c0-4.5-5-6-5-9z" fill="${c}" opacity=".55"/>
+      <path d="M15.5 24h17v8h-17z" fill="#FBFCF8" opacity=".85"/>
+      <path d="M24 25.5c2.2 2.6 3.4 4.4 3.4 5.8a3.4 3.4 0 0 1-6.8 0c0-1.4 1.2-3.2 3.4-5.8z" fill="${c}"/>
+      <path d="M18.6 16.5c.7 0 1.2.6 1.2 1.3v3.4a1.25 1.25 0 1 1-2.5 0v-3.4c0-.7.6-1.3 1.3-1.3z" fill="#fff" opacity=".5"/>`,
+
     cone: (c) => `
       <path d="M24 8c1.6 2.2 2.2 4 2.2 6h-4.4c0-2 .6-3.8 2.2-6z" fill="#5B7A4B"/>
       <ellipse cx="24" cy="17" rx="7" ry="4" fill="${c}"/>
@@ -784,16 +927,16 @@
   };
 
   const FACTS = [
-    { art: "ear",    tone: "#8C6A4A", title: "Половина гречки страны", note: "585 тыс. тонн за год" },
-    { art: "mill",   tone: "#B07D0E", title: "Первое место по муке", note: "главная мельница России" },
-    { art: "beet",   tone: "#5B7A4B", title: "Единственный сахар за Уралом", note: "завод в селе Черемное" },
-    { art: "berry",  tone: "#E1741B", title: "Облепиха — бренд края", note: "80% всех посадок" },
-    { art: "comb",   tone: "#D79A18", title: "Мёд защищён законом", note: "как шампанское" },
-    { art: "cheese", tone: "#E3B347", title: "Здесь придумали «Советский»", note: "1932 год" },
-    { art: "river",  tone: "#6E8A6B", title: "Отсюда начинается Обь", note: "3650 км до океана" },
-    { art: "cave",   tone: "#8A7A62", title: "Нашли неизвестный вид людей", note: "денисовский человек" },
-    { art: "deer",   tone: "#8A5A32", title: "Главный маральник страны", note: "панты" },
-    { art: "rocket", tone: "#6E7F8A", title: "Родина второго космонавта", note: "Герман Титов" }
+    { art: "ear", tone: "#8C6A4A", title: "Алтай — гречишная столица России", note: "585 тыс. тонн за год" },
+    { art: "mill", tone: "#B07D0E", title: "Первое место по муке и крупам", note: "" },
+    { art: "beet", tone: "#5B7A4B", title: "Весь сахар за Уралом — алтайский", note: "" },
+    { art: "berry", tone: "#E1741B", title: "Облепиха — официальная ягода края", note: "" },
+    { art: "comb", tone: "#D79A18", title: "«Алтайский мёд» защищён законом", note: "" },
+    { art: "river", tone: "#6E8A6B", title: "Обь начинается на Алтае", note: "" },
+    { art: "cave", tone: "#8A7A62", title: "Денисова пещера — родина «денисовцев»", note: "" },
+    { art: "cheese", tone: "#E3B347", title: "Шукшин и Титов — земляки", note: "" },
+    { art: "deer", tone: "#8A5A32", title: "Сыр «Советский» родом с Алтая", note: "" },
+    { art: "rocket", tone: "#6E7F8A", title: "Панты — молодые рога марала", note: "" }
   ];
 
   const factSvg = (kind, tone) =>
@@ -822,8 +965,31 @@
     return many;
   };
 
+  // гостинцы включены, только если в книге клиента заполнен лист «Гостинцы»
+  const PRIZES_ON = (CONFIG.prizes || []).some(Boolean);
+  // вопросы о крае можно выключить: собрать с ключом --no-quiz
+  const QUIZ_ON = CONFIG.quiz !== false;
+
   $("brand").textContent = CONFIG.pavilion;
-  $("pitch-art").innerHTML = svg("wedge", PRIZE_TONE.wedge);
+  if (PRIZES_ON) {
+    const top = CONFIG.prizes[3] || CONFIG.prizes[2] || CONFIG.prizes[1];
+    $("menu-title").innerHTML = "Соберите заказ — <em>а комплимент выиграйте</em>";
+    $("menu-lede").textContent = "Отметьте, что берёте. После сборки заказа откроются три вопроса "
+      + "о крае: чем больше верных ответов, тем весомее гостинец от павильона.";
+    $("pitch-title").textContent = "Три вопроса — и гостинец";
+    $("pitch-text").textContent = [1, 2, 3]
+      .filter((n) => CONFIG.prizes[n])
+      .map((n) => n + " — " + CONFIG.prizes[n].name.toLowerCase())
+      .join(", ") + ". Минута времени.";
+    $("track-3").textContent = "комплимент";
+    $("pitch-art").innerHTML = svg(top ? top.art : "wedge", PRIZE_TONE[top ? top.art : "wedge"] || "#E3B347");
+  } else {
+    // без гостинцев вопросы — про край, а не про сыр
+    $("pitch-art").innerHTML = factSvg("cave", "#8A7A62");
+    $("ico-quiz").innerHTML = factSvg("cave", "#8A7A62");
+  }
+
+
   $("ico-quiz").innerHTML = svg("wedge", PRIZE_TONE.wedge);
   $("ico-facts").innerHTML = factSvg("berry", "#E1741B");
   $("ico-items").innerHTML = svg("box", "#5B7A4B");
@@ -880,6 +1046,18 @@
 
         const pr = document.createElement("div");
         pr.className = "price";
+
+        if (it.soon) {
+          const note = document.createElement("div");
+          note.className = "soon-note";
+          note.textContent = "цена уточняется";
+          pr.appendChild(note);
+          row.className = "item soon";
+          row.appendChild(art); row.appendChild(nm); row.appendChild(un); row.appendChild(pr);
+          block.appendChild(row);
+          return;
+        }
+
         const rb = document.createElement("div");
         rb.className = "rub";
         rb.textContent = rub(it.price);
@@ -1035,16 +1213,22 @@
     v.appendChild(tag); v.appendChild(p);
     $("verdict-slot").appendChild(v);
 
-    $("next").textContent = step === 2 ? "Показать комплимент" : "Дальше";
+    $("next").textContent = step === 2 ? (PRIZES_ON ? "Показать комплимент" : "Вернуться к заказу") : "Дальше";
     $("next").style.display = "block";
   }
 
   /* ---- заказ ---- */
-  function makeOrder() {
+  function askName() {
+    $("name-error").classList.remove("on");
+    show("scr-name", 1);
+    setTimeout(() => $("name-input").focus(), 120);
+  }
+
+  function makeOrder(guestName) {
     const now = new Date();
 
     order = {
-      no: pad(now.getHours()) + pad(now.getMinutes()) + "-" + Math.floor(10 + Math.random() * 89),
+      no: guestName,
       at: now.getTime(),
       items: cartList(),
       sum: cartSum(),
@@ -1060,8 +1244,8 @@
   }
 
   function renderOrder() {
-    $("order-no").textContent = "№ " + order.no;
-    $("items-no").textContent = "№ " + order.no;
+    $("order-no").textContent = order.no;
+    $("items-no").textContent = order.no;
 
     const d = new Date(order.at);
     const when = pad(d.getDate()) + "." + pad(d.getMonth() + 1) + " · " + pad(d.getHours()) + ":" + pad(d.getMinutes());
@@ -1071,20 +1255,26 @@
     renderLines($("order-lines"), order.items);
     $("o-final").textContent = rub(order.sum);
 
-    $("order-code").textContent = order.prize
-      ? order.prize.key.toUpperCase() + " · " + order.word
-      : "БЕЗ КОМПЛИМЕНТА · " + order.word;
-    $("o-score").textContent = order.quizDone
-      ? order.score + " из 3 верных"
-      : "квиз не пройден";
+    if (PRIZES_ON) {
+      $("order-code").style.display = "block";
+      $("order-code").textContent = order.prize
+        ? order.prize.key.toUpperCase() + " · " + order.word
+        : "БЕЗ КОМПЛИМЕНТА · " + order.word;
+    } else {
+      $("order-code").style.display = "none";
+    }
+    $("o-score").textContent = !QUIZ_ON ? ""
+      : order.quizDone ? order.score + " из 3 верных"
+      : "на вопросы не отвечали";
 
     renderGift();
     renderHub();
+    tidyTicket();
   }
 
   function renderGift() {
     const gift = $("gift");
-    if (!order.quizDone) { gift.style.display = "none"; return; }
+    if (!PRIZES_ON || !order.quizDone) { gift.style.display = "none"; return; }
 
     gift.style.display = "flex";
     gift.innerHTML = "";
@@ -1118,22 +1308,42 @@
 
   function renderHub() {
     const q = $("hub-quiz");
+    if (!q) return;
     if (order.quizDone) {
       q.className = "hub-btn done";
       q.disabled = true;
-      q.querySelector("b").textContent = "Квиз пройден";
-      q.querySelector("small").textContent = order.score + " из 3";
+      q.querySelector("b").textContent = "Вы ответили";
+      q.querySelector("small").textContent = order.score + " из 3 верных";
     } else {
       q.className = "hub-btn main";
       q.disabled = false;
-      q.querySelector("b").textContent = "Пройти квиз";
-      q.querySelector("small").textContent = "получить комплимент";
+      q.querySelector("b").textContent = "Три вопроса";
+      q.querySelector("small").textContent = PRIZES_ON ? "получить комплимент" : "о крае, откуда еда";
     }
   }
 
+  /** Пустой низ талона не нужен: прячем отрывную часть, если в ней нечего показать. */
+  function tidyTicket() {
+    const body = $("order-status").parentNode;
+    const visible = Array.from(body.children).some(
+      (el) => getComputedStyle(el).display !== "none");
+    body.style.display = visible ? "flex" : "none";
+    document.querySelector(".perf").style.display = visible ? "block" : "none";
+  }
+
   function shout(kind, text) {
-    $("order-status").className = "shout" + (kind === "wait" ? " wait" : "");
-    $("order-status").textContent = text;
+    const el = $("order-status");
+    // при успехе талон остаётся чистым: имя, дата, время — и всё
+    if (kind === "ok") {
+      el.style.display = "none";
+      el.textContent = "";
+      tidyTicket();
+      return;
+    }
+    el.style.display = "block";
+    el.className = "shout" + (kind === "wait" ? " wait" : kind === "note" ? " note" : "");
+    el.textContent = text;
+    tidyTicket();
   }
 
   /* ---- отправка в павильон ---- */
@@ -1156,7 +1366,7 @@
 
   function sendOrder() {
     if (!CONFIG.sheetUrl) {
-      shout("ok", "Заказ собран. Покажите этот экран продавцу.");
+      shout("note", "Оплатите заказ у продавца");
       return;
     }
 
@@ -1169,10 +1379,10 @@
       items: order.items.map((it) => it.name + " (" + it.unit + ") ×" + it.qty).join("; "),
       sum: order.sum
     },
-    () => shout("ok", "Заказ принят павильоном — его уже собирают. Назовите номер на кассе."),
+    () => shout("note", "Оплатите заказ у продавца"),
     (why) => shout("fail", why === "offline"
-      ? "Заказ собран. Покажите этот экран продавцу."
-      : "Заказ не ушёл автоматически — покажите этот экран продавцу, здесь есть всё нужное."));
+      ? "Покажите этот экран продавцу."
+      : "Заказ не ушёл — покажите этот экран продавцу, здесь есть всё нужное."));
   }
 
   function sendPrize() {
@@ -1230,13 +1440,30 @@
   /* ---- переходы ---- */
   $("to-cart").addEventListener("click", () => { renderCart(); show("scr-cart", 0); });
   $("back-menu").addEventListener("click", () => show("scr-menu", 0));
-  $("send-order").addEventListener("click", makeOrder);
+  $("send-order").addEventListener("click", askName);
+  $("name-back").addEventListener("click", () => show("scr-cart", 0));
+  $("name-send").addEventListener("click", sendWithName);
+  $("name-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendWithName();
+  });
+
+  function sendWithName() {
+    let name = $("name-input").value.trim().replace(/\s+/g, " ");
+    name = name.charAt(0).toUpperCase() + name.slice(1);   // «мария» → «Мария»
+    if (name.length < 2) {
+      $("name-error").classList.add("on");
+      $("name-input").focus();
+      return;
+    }
+    makeOrder(name);
+  }
 
   $("hub-quiz").addEventListener("click", startQuiz);
   $("hub-facts").addEventListener("click", () => openFacts("scr-order", 2));
   $("hub-items").addEventListener("click", () => show("scr-items", 2));
   $("hub-new").addEventListener("click", () => {
     Object.keys(cart).forEach((id) => delete cart[id]);
+    $("name-input").value = "";
     renderMenu(); refreshBar(); show("scr-menu", 0);
   });
 
@@ -1247,6 +1474,20 @@
     if (step === 2) { finishQuiz(); return; }
     step++; renderQuestion(); window.scrollTo({ top: 0 });
   });
+
+  if (!QUIZ_ON) {
+    // вопросы выключены: убираем плитку, приглашение и третий шаг в шапке
+    $("hub-quiz").remove();
+    $("hub-new").classList.add("wide");
+    $("track-3").textContent = "готово";
+    $("menu-title").innerHTML = "Соберите заказ — <em>мы начнём готовить</em>";
+    $("menu-lede").textContent = "Отметьте, что берёте, и отправьте заказ в павильон. "
+      + "Пока его собирают, можно почитать о крае, откуда эта еда.";
+    $("pitch-art").innerHTML = factSvg("berry", "#E1741B");
+    $("pitch-title").textContent = "Пока готовим";
+    $("pitch-text").textContent = "Десять коротких фактов о крае, откуда приехала эта еда — "
+      + "на экране заказа.";
+  }
 
   renderMenu();
   refreshBar();
